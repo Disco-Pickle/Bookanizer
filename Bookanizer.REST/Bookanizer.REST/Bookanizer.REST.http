@@ -1,0 +1,6 @@
+@Bookanizer.REST_HostAddress = http://localhost:5079
+
+GET {{Bookanizer.REST_HostAddress}}
+Accept: application/json
+
+###
