@@ -11,20 +11,14 @@ namespace Bookanizer.REST.DAL.Models
         {
             AuthorId = 0;
             Name = string.Empty;
-            AverageRating = 0.0;
-            RatingsCount = 0;
             Books = new List<BookModel>();
         }
         public AuthorModel(
             int authorId,
-            string name,
-            double averageRating,
-            int ratingsCount)
+            string name)
         {
             AuthorId = authorId;
             Name = name;
-            AverageRating = averageRating;
-            RatingsCount = ratingsCount;
             Books = new List<BookModel>();
         }
         #endregion
@@ -38,24 +32,14 @@ namespace Bookanizer.REST.DAL.Models
         [Column("name")]
         public string Name { get; set; }
 
-        [Column("average_rating")]
-        public double AverageRating { get; set; }
-
-        [Column("ratings_count")]
-        public int RatingsCount { get; set; }
-
         public ICollection<BookModel> Books { get; set; }
         #endregion
 
         #region Methods
         public  void Update(
-            string name,
-            double averageRating,
-            int ratingsCount)
+            string name)
         {
             Name = name;
-            AverageRating = averageRating;
-            RatingsCount = ratingsCount;
         }
         #endregion
     }
