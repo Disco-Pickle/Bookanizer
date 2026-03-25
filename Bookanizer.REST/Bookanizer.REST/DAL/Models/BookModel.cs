@@ -9,7 +9,7 @@ namespace Bookanizer.REST.DAL.Models
         #region Constructor
         public BookModel() 
         { 
-            Id = Guid.NewGuid();
+            Id = 0;
             Isbn = null;
             Isbn13 = null;
             CountryCode = null; 
@@ -17,7 +17,7 @@ namespace Bookanizer.REST.DAL.Models
             AverageRating = 0.0;
             RatingsCount = 0;
             Author = null!; // Tells the compiler I know it looks like null, but EF will populate it
-            AuthorId = Guid.Empty;
+            AuthorId = 0;
             NumPages = 0;
             PublicationDate = null;
             Title = null;
@@ -28,10 +28,10 @@ namespace Bookanizer.REST.DAL.Models
         #region Properties
         [Key]
         [Column("id")]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
-        [MaxLength(10)]
         [Column("isbn")]
+        [MaxLength(10)]
         public string? Isbn { get; set; }
 
         [Column("isbn13")]
@@ -52,9 +52,8 @@ namespace Bookanizer.REST.DAL.Models
         [Column("ratings_count")]
         public int RatingsCount { get; set; }
 
-        [Required]
         [Column("author_id")]
-        public Guid AuthorId { get; set; }
+        public int AuthorId { get; set; }
 
         [ForeignKey("AuthorId")]
         public Author Author { get; set; }
@@ -83,7 +82,7 @@ namespace Bookanizer.REST.DAL.Models
             string? languageCode, 
             double averageRating, 
             int ratingsCount, 
-            Guid authorId, 
+            int authorId, 
             int numPages, 
             DateOnly? publicationDate,
             string? title, 
