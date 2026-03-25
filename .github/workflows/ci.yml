@@ -5,10 +5,12 @@ on:
     branches: ["main", "feature/**"]
     paths:
       - "Bookanizer.REST/**"
+      - ".github/workflows/**"
   pull_request:
     branches: ["main", "feature/**"]
     paths:
       - "Bookanizer.REST/**"
+      - ".github/workflows/**"
 
 jobs:
   build-and-test:
