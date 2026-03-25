@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bookanizer.REST.DAL.Models
 {
@@ -24,12 +25,12 @@ namespace Bookanizer.REST.DAL.Models
         #endregion
 
         #region Properties
-        [Key]
         [Column("author_id")]
+        [Key]
         public int AuthorId { get; set; }
 
-        [Required]
         [Column("name")]
+        [Required]
         public string Name { get; set; }
 
         public ICollection<BookModel> Books { get; set; }

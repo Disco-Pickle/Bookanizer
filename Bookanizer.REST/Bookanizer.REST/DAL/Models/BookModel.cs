@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bookanizer.REST.DAL.Models
 {
@@ -54,8 +55,8 @@ namespace Bookanizer.REST.DAL.Models
         #endregion
 
         #region Properties
-        [Key]
         [Column("book_id")]
+        [Key]
         public int BookId { get; set; }
 
         [Column("isbn")]
@@ -96,8 +97,8 @@ namespace Bookanizer.REST.DAL.Models
         [MaxLength(511)]
         public string? Title { get; set; }
 
-        [Required]
         [Column("title_without_series")]
+        [Required]
         [MaxLength(255)]
         public string TitleWithoutSeries { get; set; }
         #endregion
