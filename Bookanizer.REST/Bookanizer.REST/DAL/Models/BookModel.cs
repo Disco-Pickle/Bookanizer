@@ -68,11 +68,11 @@ namespace Bookanizer.REST.DAL.Models
         public string? Isbn13 { get; set; }
 
         [Column("country_code")]
-        [MaxLength(255)]
+        [MaxLength(256)]
         public string? CountryCode { get; set; }
         
         [Column("language_code")]
-        [MaxLength(255)]
+        [MaxLength(256)]
         public string? LanguageCode { get; set; }
 
         [Column("average_rating")]
@@ -94,12 +94,12 @@ namespace Bookanizer.REST.DAL.Models
         public DateOnly? PublicationDate { get; set; }
 
         [Column("title")]
-        [MaxLength(511)]
+        [MaxLength(512)]
         public string? Title { get; set; }
 
         [Column("title_without_series")]
         [Required]
-        [MaxLength(255)]
+        [MaxLength(256)]
         public string TitleWithoutSeries { get; set; }
         #endregion
 
