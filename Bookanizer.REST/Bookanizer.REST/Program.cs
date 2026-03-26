@@ -1,17 +1,24 @@
-// -----------------------
-// BUILDER
-// -----------------------
-var builder = WebApplication.CreateBuilder(args);
+using Bookanizer.REST.DAL;
+using Microsoft.EntityFrameworkCore;
 
 // -----------------------
-// SERVICES
+// BUILD APPLICATION
 // -----------------------
+
+// Builder
+var builder = WebApplication.CreateBuilder(args);
+
+// Controllers
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-// -----------------------
-// BUILD
-// -----------------------
+// DB Configuration
+builder.Services.AddDbContext<DataContext>(options =>
+{
+    options.UseNpgsql(Configuration.PostgresConnectionString);
+});
+
+// Build
 var app = builder.Build();
 
 // -----------------------
@@ -21,11 +28,9 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
+app.UseAuthentication();
+app.UseAuthorization(); // Endpoints annotated with [Authorize] will require authorization
 app.MapControllers();
 
 // -----------------------

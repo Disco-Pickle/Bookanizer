@@ -36,7 +36,7 @@ namespace Bookanizer.REST.DAL.Models
         public ICollection<BookModel> Books { get; set; }
         #endregion
 
-        #region Methods
+        #region Methods 
         public  void Update(
             string name)
         {
