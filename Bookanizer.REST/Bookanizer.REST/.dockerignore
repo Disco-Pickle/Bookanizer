@@ -1,0 +1,20 @@
+# C#
+**/bin
+**/obj
+**/.vs
+**/.idea
+**/.vscode
+*.user
+*.suo
+*.swp
+
+# Python
+**/__pycache__
+**/*.pyc
+**/*.pyo
+.venv/
+venv/
+
+# Environment
+.env
+.env.*
