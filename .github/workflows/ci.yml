@@ -14,9 +14,31 @@ on:
 
 jobs:
   build-and-test:
-    name: Build & Test - REST API
+    name: Build & Test
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: bookanizer
+          POSTGRES_USER: bookanizer
+          POSTGRES_PASSWORD: ci_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bookanizer -d bookanizer"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: bookanizer
+      POSTGRES_USERNAME: bookanizer
+      POSTGRES_PASSWORD: ci_password
+      
     defaults:
       run:
         working-directory: ./Bookanizer.REST

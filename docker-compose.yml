@@ -1,0 +1,73 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    environment:
+      - POSTGRES_DB=bookanizer
+      - POSTGRES_USER=bookanizer
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - bookanizer-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bookanizer -d bookanizer"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  rest:
+    build:
+      context: ./Bookanizer.REST/Bookanizer.REST
+      dockerfile: Dockerfile
+    container_name: rest
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development # Change to Production once it's hosted
+      - ASPNETCORE_URLS=http://+:5001
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DATABASE=bookanizer
+      - POSTGRES_USERNAME=bookanizer
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bookanizer-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      rest:
+        condition: service_healthy
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - bookanizer-network
+    restart: unless-stopped
+
+networks:
+  bookanizer-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
