@@ -43,6 +43,28 @@ var app = builder.Build();
 logger.Info("Application built.");
 
 // -----------------------
+// DATABASE MIGRATIONS
+// -----------------------
+
+logger.Info("=== Applying migrations to database ===");
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        logger.Info("Applying database migrations...");
+        var dataContext = services.GetRequiredService<DataContext>();
+        dataContext.Database.Migrate();
+        logger.Info("Database migrations applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.Error("Database migrations failed to apply.", ex);
+        throw;
+    }
+}
+
+// -----------------------
 // HTTP REQUEST PIPELINE
 // -----------------------
 

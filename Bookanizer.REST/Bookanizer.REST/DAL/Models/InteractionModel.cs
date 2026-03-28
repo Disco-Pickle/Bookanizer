@@ -54,13 +54,11 @@ namespace Bookanizer.REST.DAL.Models
         [MaxLength(32)]
         public string UserId { get; set; } // MD5 hash in the Wan & McAuley Goodreads dataset
 
-        [ForeignKey("UserId")]
         public UserModel User { get; set; }
 
         [Column("book_id")]
         public int BookId { get; set; }
 
-        [ForeignKey("BookId")]
         public BookModel Book { get; set; }
 
         [Column("is_read")]

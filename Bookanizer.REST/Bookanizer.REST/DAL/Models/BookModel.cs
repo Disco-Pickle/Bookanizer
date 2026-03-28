@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 namespace Bookanizer.REST.DAL.Models
 {
@@ -23,6 +22,7 @@ namespace Bookanizer.REST.DAL.Models
             PublicationDate = null;
             Title = null;
             TitleWithoutSeries = string.Empty;
+            Interactions = new List<InteractionModel>();
         }
         public BookModel(
             int bookId,
@@ -51,6 +51,7 @@ namespace Bookanizer.REST.DAL.Models
             PublicationDate = publicationDate;
             Title = title;
             TitleWithoutSeries = titleWithoutSeries;
+            Interactions = new List<InteractionModel>();
         }
         #endregion
 
@@ -84,7 +85,6 @@ namespace Bookanizer.REST.DAL.Models
         [Column("author_id")]
         public int AuthorId { get; set; }
 
-        [ForeignKey("AuthorId")]
         public AuthorModel Author { get; set; }
 
         [Column("num_pages")]
@@ -101,6 +101,8 @@ namespace Bookanizer.REST.DAL.Models
         [Required]
         [MaxLength(256)]
         public string TitleWithoutSeries { get; set; }
+
+        public ICollection<InteractionModel> Interactions { get; set; }
         #endregion
 
         #region Methods
