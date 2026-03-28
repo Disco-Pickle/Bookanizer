@@ -20,18 +20,18 @@ namespace Bookanizer.REST.DAL
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<BookModel>()
-                .HasOne<AuthorModel>()                  // Books have one author
-                .WithMany()                             // Authors have many books
-                .HasForeignKey(book => book.AuthorId)   // FK: AuthorId
-                .OnDelete(DeleteBehavior.Cascade);      // On deletion of an author, delete dependent books
+                .HasOne<AuthorModel>(book => book.Author) // Books have one author
+                .WithMany(author => author.Books)         // Authors have many books
+                .HasForeignKey(book => book.AuthorId)     // FK: AuthorId
+                .OnDelete(DeleteBehavior.Cascade);        // On deletion of an author, delete dependent books
             modelBuilder.Entity<InteractionModel>()
-                .HasOne<UserModel>()                                // Interactions have one user
-                .WithMany()                                         // Users have many interactions
+                .HasOne<UserModel>(interaction => interaction.User) // Interactions have one user
+                .WithMany(user => user.Interactions)                // Users have many interactions
                 .HasForeignKey(interaction => interaction.UserId)   // FK: UserId
                 .OnDelete(DeleteBehavior.Cascade);                  // On deletion of a user, delete dependent interactions
             modelBuilder.Entity<InteractionModel>()
-                .HasOne<BookModel>()                                // Interactions have one book
-                .WithMany()                                         // Books have many interactions
+                .HasOne<BookModel>(interaction => interaction.Book) // Interactions have one book
+                .WithMany(book => book.Interactions)                // Books have many interactions
                 .HasForeignKey(interaction => interaction.BookId)   // FK: BookId
                 .OnDelete(DeleteBehavior.Cascade);                  // On deletion of a book, delete dependent interactions
             base.OnModelCreating(modelBuilder);
