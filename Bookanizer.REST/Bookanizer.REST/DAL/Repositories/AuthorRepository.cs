@@ -36,10 +36,10 @@ namespace Bookanizer.REST.DAL.Repositories
         }
 
         public async Task<AuthorModel?> ReadSingleByIdAsync(
-            int id, 
+            int authorId, 
             CancellationToken ct = default)
         {
-            return await _db.Authors.AsNoTracking().FirstOrDefaultAsync(a => a.AuthorId == id, ct);
+            return await _db.Authors.AsNoTracking().FirstOrDefaultAsync(a => a.AuthorId == authorId, ct);
         }
 
 
@@ -64,10 +64,10 @@ namespace Bookanizer.REST.DAL.Repositories
         }
 
         public async Task<bool> DeleteSingleByIdAsync(
-            int id, 
+            int authorId, 
             CancellationToken ct = default)
         {
-            var amountDeleted = await _db.Authors.Where(a => a.AuthorId == id)
+            var amountDeleted = await _db.Authors.Where(a => a.AuthorId == authorId)
                                                  .ExecuteDeleteAsync(ct); // ExecuteDeleteAsync does not need a SaveChanges() call
             
             return amountDeleted > 0;

@@ -36,10 +36,10 @@ namespace Bookanizer.REST.DAL.Repositories
         }
 
         public async Task<BookModel?> ReadSingleByIdAsync(
-            int id,
+            int bookId,
             CancellationToken ct = default)
         {
-            return await _db.Books.AsNoTracking().Include(b => b.Author).FirstOrDefaultAsync(b => b.BookId == id, ct);
+            return await _db.Books.AsNoTracking().Include(b => b.Author).FirstOrDefaultAsync(b => b.BookId == bookId, ct);
         }
 
         public async Task<List<BookModel>> ReadMultipleByTitleAsync(
@@ -85,10 +85,10 @@ namespace Bookanizer.REST.DAL.Repositories
         }
 
         public async Task<bool> DeleteSingleByIdAsync(
-            int id, 
+            int bookId, 
             CancellationToken ct = default)
         {
-            var amountDeleted = await _db.Books.Where(b => b.BookId == id)
+            var amountDeleted = await _db.Books.Where(b => b.BookId == bookId)
                                                .ExecuteDeleteAsync(ct); // ExecuteDeleteAsync does not need a SaveChanges() call
 
             return amountDeleted > 0;
