@@ -36,10 +36,9 @@ namespace Bookanizer.REST.DAL.Models
         #endregion
 
         #region Methods 
-        public  void Update(
-            string name)
+        public  void Update(AuthorModel author)
         {
-            Name = name;
+            Name = author.Name;
         }
         #endregion
     }

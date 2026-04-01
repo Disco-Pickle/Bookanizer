@@ -22,15 +22,16 @@ namespace Bookanizer.REST.DAL.Repositories
             AuthorModel author, 
             CancellationToken ct = default) // CTs so user etc cancellations lead to cancelled data requests etc
         {
-            var found = await _db.Authors.FirstOrDefaultAsync(dbAuthor => dbAuthor.AuthorId == author.AuthorId);
-            if (found == null)
+            var dbAuthor = await _db.Authors.FirstOrDefaultAsync(a => a.AuthorId == author.AuthorId, ct);
+            if (dbAuthor == null)
             {
-                await _db.Authors.AddAsync(author);
+                await _db.Authors.AddAsync(author, ct);
             }
             else
             {
-                found.Update(author.Name);
+                dbAuthor.Update(author);
             }
+
             await _db.SaveChangesAsync(ct);
         }
 
@@ -38,7 +39,7 @@ namespace Bookanizer.REST.DAL.Repositories
             int id, 
             CancellationToken ct = default)
         {
-            return await _db.Authors.AsNoTracking().FirstOrDefaultAsync(dbAuthor => dbAuthor.AuthorId == id);
+            return await _db.Authors.AsNoTracking().FirstOrDefaultAsync(a => a.AuthorId == id, ct);
         }
 
 
@@ -52,39 +53,24 @@ namespace Bookanizer.REST.DAL.Repositories
 
             if (!string.IsNullOrWhiteSpace(name))
             {
-                queryable = queryable.Where(author => EF.Functions.ILike(author.Name, $"%{name}%")); // Case-insensitive search for author's name
+                queryable = queryable.Where(a => EF.Functions.ILike(a.Name, $"%{name}%")); // Case-insensitive search for author's name
             }
 
-            return await queryable.OrderByDescending(author => author.Name)
-                                  .ThenByDescending(author => author.AuthorId)
+            return await queryable.OrderByDescending(a => a.Name)
+                                  .ThenByDescending(a => a.AuthorId)
                                   .Skip(skip)
                                   .Take(take)
                                   .ToListAsync(ct);
         }
 
-        public async Task<List<AuthorModel>> ReadAllAsync(
-            int skip, 
-            int take, 
+        public async Task<bool> DeleteSingleByIdAsync(
+            int id, 
             CancellationToken ct = default)
         {
-            return await _db.Authors.AsNoTracking()   // AsNoTracking to improve performance (no unnecessary snapshots)
-                                    .OrderByDescending(author => author.Name)
-                                    .ThenByDescending(author => author.AuthorId)
-                                    .Skip(skip)       // Skip to allow pagination (allows guarding against pulling entire db)
-                                    .Take(take)       // Take to allow pagination (allows guarding against pulling entire db)
-                                    .ToListAsync(ct); 
-        }
-
-        public async Task<bool> DeleteSingleByIdAsync(int id, CancellationToken ct = default)
-        {
-            var deleted = await _db.Authors.Where(dbAuthor => dbAuthor.AuthorId == id)
-                                           .ExecuteDeleteAsync(ct); // ExecuteDeleteAsync does not need a SaveChanges() call
-            return deleted > 0;
-        }
-
-        public async Task DeleteAllAsync(CancellationToken ct = default)
-        {
-           await _db.Authors.ExecuteDeleteAsync(ct);
+            var amountDeleted = await _db.Authors.Where(a => a.AuthorId == id)
+                                                 .ExecuteDeleteAsync(ct); // ExecuteDeleteAsync does not need a SaveChanges() call
+            
+            return amountDeleted > 0;
         }
         #endregion
     }
