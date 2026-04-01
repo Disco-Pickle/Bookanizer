@@ -84,22 +84,15 @@ namespace Bookanizer.REST.DAL.Models
         #endregion
 
         #region Methods
-        public void Update(
-            bool isRead,
-            double rating,
-            DateTimeOffset? dateAdded,
-            DateTimeOffset? dateUpdated,
-            DateTimeOffset? readAt,
-            DateTimeOffset? startedAt,
-            ReadLocationEnum? readLocation)
+        public void Update(InteractionModel interaction)
         {
-            IsRead = isRead;
-            Rating = rating;
-            DateAdded = dateAdded;
-            DateUpdated = dateUpdated;
-            ReadAt = readAt;
-            StartedAt = startedAt;
-            ReadLocation = readLocation;
+            IsRead = interaction.IsRead;
+            Rating = interaction.Rating;
+            DateAdded = interaction.DateAdded;
+            DateUpdated = interaction.DateUpdated;
+            ReadAt = interaction.ReadAt;
+            StartedAt = interaction.StartedAt;
+            ReadLocation = interaction.ReadLocation;
         }
         #endregion
     }
