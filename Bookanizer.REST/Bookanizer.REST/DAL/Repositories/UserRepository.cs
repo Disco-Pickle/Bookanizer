@@ -17,7 +17,7 @@ namespace Bookanizer.REST.DAL.Repositories
         private readonly DataContext _db;
         #endregion
 
-        #region CRUD
+        #region User Level CRUD Operations
         public async Task CreateSingleAsync(
             UserModel user,
             CancellationToken ct = default)
@@ -38,7 +38,8 @@ namespace Bookanizer.REST.DAL.Repositories
             string userId,
             CancellationToken ct = default)
         {
-            return await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == userId, ct);
+            return await _db.Users.AsNoTracking()
+                                  .FirstOrDefaultAsync(u => u.UserId == userId, ct);
         }
 
         public async Task UpdateSingleAsync(
@@ -65,6 +66,14 @@ namespace Bookanizer.REST.DAL.Repositories
                                                .ExecuteDeleteAsync(ct); // ExecuteDeleteAsync does not need a SaveChanges() call
 
             return amountDeleted > 0;
+        }
+        #endregion
+
+        #region Admin Level CRUD Operations
+        public async Task DeleteAllAsync(
+            CancellationToken ct = default)
+        {
+            await _db.Users.ExecuteDeleteAsync(ct);
         }
         #endregion
     }

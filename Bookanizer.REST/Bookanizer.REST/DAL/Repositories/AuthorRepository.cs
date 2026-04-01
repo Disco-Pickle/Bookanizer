@@ -17,7 +17,37 @@ namespace Bookanizer.REST.DAL.Repositories
         private readonly DataContext _db;
         #endregion
 
-        #region CRUD
+        #region User Level CRUD Operations
+        public async Task<AuthorModel?> ReadSingleByIdAsync(
+            int authorId, 
+            CancellationToken ct = default)
+        {
+            return await _db.Authors.AsNoTracking()
+                                    .FirstOrDefaultAsync(a => a.AuthorId == authorId, ct);
+        }
+
+        public async Task<List<AuthorModel>> ReadMultipleByNameAsync(
+            string name, 
+            int skip, 
+            int take, 
+            CancellationToken ct = default)
+        {
+            IQueryable<AuthorModel> queryable = _db.Authors.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                queryable = queryable.Where(a => EF.Functions.ILike(a.Name, $"%{name}%")); // Case-insensitive search for author's name
+            }
+
+            return await queryable.OrderBy(a => a.Name)
+                                  .ThenBy(a => a.AuthorId)
+                                  .Skip(skip)
+                                  .Take(take)
+                                  .ToListAsync(ct);
+        }
+        #endregion
+
+        #region Admin Level CRUD Operations
         public async Task CreateOrUpdateSingleAsync(
             AuthorModel author, 
             CancellationToken ct = default) // CTs so user etc cancellations lead to cancelled data requests etc
@@ -35,34 +65,6 @@ namespace Bookanizer.REST.DAL.Repositories
             await _db.SaveChangesAsync(ct);
         }
 
-        public async Task<AuthorModel?> ReadSingleByIdAsync(
-            int authorId, 
-            CancellationToken ct = default)
-        {
-            return await _db.Authors.AsNoTracking().FirstOrDefaultAsync(a => a.AuthorId == authorId, ct);
-        }
-
-
-        public async Task<List<AuthorModel>> ReadMultipleByNameAsync(
-            string name, 
-            int skip, 
-            int take, 
-            CancellationToken ct = default)
-        {
-            IQueryable<AuthorModel> queryable = _db.Authors.AsNoTracking();
-
-            if (!string.IsNullOrWhiteSpace(name))
-            {
-                queryable = queryable.Where(a => EF.Functions.ILike(a.Name, $"%{name}%")); // Case-insensitive search for author's name
-            }
-
-            return await queryable.OrderByDescending(a => a.Name)
-                                  .ThenByDescending(a => a.AuthorId)
-                                  .Skip(skip)
-                                  .Take(take)
-                                  .ToListAsync(ct);
-        }
-
         public async Task<bool> DeleteSingleByIdAsync(
             int authorId, 
             CancellationToken ct = default)
@@ -71,6 +73,12 @@ namespace Bookanizer.REST.DAL.Repositories
                                                  .ExecuteDeleteAsync(ct); // ExecuteDeleteAsync does not need a SaveChanges() call
             
             return amountDeleted > 0;
+        }
+
+        public async Task DeleteAllAsync(
+            CancellationToken ct = default)
+        {
+            await _db.Authors.ExecuteDeleteAsync(ct);
         }
         #endregion
     }

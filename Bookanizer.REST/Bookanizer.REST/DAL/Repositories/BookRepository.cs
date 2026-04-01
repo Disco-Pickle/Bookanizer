@@ -17,7 +17,60 @@ namespace Bookanizer.REST.DAL.Repositories
         private readonly DataContext _db;
         #endregion
 
-        #region CRUD
+        #region User Level CRUD Operations
+        public async Task<BookModel?> ReadSingleByIdAsync(
+            int bookId,
+            CancellationToken ct = default)
+        {
+            return await _db.Books.AsNoTracking()
+                                  .Include(b => b.Author)
+                                  .FirstOrDefaultAsync(b => b.BookId == bookId, ct);
+        }
+
+        public async Task<List<BookModel>> ReadMultipleByTitleAsync(
+            string title,
+            int skip,
+            int take,
+            CancellationToken ct = default)
+        {
+            IQueryable<BookModel> queryable = _db.Books.AsNoTracking().Include(b => b.Author);
+
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                queryable = queryable.Where(b => EF.Functions.ILike(b.Title ?? "", $"%{title}%")); // Case-insensitive search for book's title
+            }
+            return await queryable.OrderBy(b => b.TitleWithoutSeries)
+                                  .ThenBy(b => b.Author.Name)
+                                  .ThenBy(b => b.BookId)
+                                  .Skip(skip)
+                                  .Take(take)
+                                  .ToListAsync(ct);
+        }
+
+        public async Task<List<BookModel>> ReadMultipleByTitleWithoutSeriesAsync(
+            string titleWithoutSeries,
+            int skip,
+            int take,
+            CancellationToken ct = default)
+        {
+            IQueryable<BookModel> queryable = _db.Books.AsNoTracking()
+                                                       .Include(b => b.Author);
+
+            if (!string.IsNullOrWhiteSpace(titleWithoutSeries))
+            {
+                queryable = queryable.Where(b => EF.Functions.ILike(b.TitleWithoutSeries ?? "", $"%{titleWithoutSeries}%")); // Case-insensitive search for book's title without series
+            }
+
+            return await queryable.OrderBy(b => b.TitleWithoutSeries)
+                                    .ThenBy(b => b.Author.Name)
+                                    .ThenBy(b => b.BookId)
+                                    .Skip(skip)
+                                    .Take(take)
+                                    .ToListAsync(ct);
+        }
+        #endregion
+
+        #region Admin Level CRUD Operations
         public async Task CreateOrUpdateSingleAsync(
             BookModel book,
             CancellationToken ct = default)
@@ -35,55 +88,6 @@ namespace Bookanizer.REST.DAL.Repositories
             await _db.SaveChangesAsync(ct);
         }
 
-        public async Task<BookModel?> ReadSingleByIdAsync(
-            int bookId,
-            CancellationToken ct = default)
-        {
-            return await _db.Books.AsNoTracking().Include(b => b.Author).FirstOrDefaultAsync(b => b.BookId == bookId, ct);
-        }
-
-        public async Task<List<BookModel>> ReadMultipleByTitleAsync(
-            string title,
-            int skip,
-            int take,
-            CancellationToken ct = default)
-        {
-            IQueryable<BookModel> queryable = _db.Books.AsNoTracking().Include(b => b.Author);
-
-            if (!string.IsNullOrWhiteSpace(title))
-            {
-                queryable = queryable.Where(b => EF.Functions.ILike(b.Title ?? "", $"%{title}%")); // Case-insensitive search for book's title
-            }
-
-            return await queryable.OrderByDescending(b => b.TitleWithoutSeries)
-                                  .ThenByDescending(b => b.Author.Name)
-                                  .ThenByDescending(b => b.BookId)
-                                  .Skip(skip)
-                                  .Take(take)
-                                  .ToListAsync(ct);
-        }
-
-        public async Task<List<BookModel>> ReadMultipleByTitleWithoutSeriesAsync(
-            string titleWithoutSeries,
-            int skip,
-            int take,
-            CancellationToken ct = default)
-        {
-            IQueryable<BookModel> queryable = _db.Books.AsNoTracking().Include(b => b.Author);
-
-            if (!string.IsNullOrWhiteSpace(titleWithoutSeries))
-            {
-                queryable = queryable.Where(b => EF.Functions.ILike(b.TitleWithoutSeries ?? "", $"%{titleWithoutSeries}%")); // Case-insensitive search for book's title without series
-            }
-
-            return await queryable.OrderByDescending(b => b.TitleWithoutSeries)
-                                    .ThenByDescending(b => b.Author.Name)
-                                    .ThenByDescending(b => b.BookId)
-                                    .Skip(skip)
-                                    .Take(take)
-                                    .ToListAsync(ct);
-        }
-
         public async Task<bool> DeleteSingleByIdAsync(
             int bookId, 
             CancellationToken ct = default)
@@ -92,6 +96,12 @@ namespace Bookanizer.REST.DAL.Repositories
                                                .ExecuteDeleteAsync(ct); // ExecuteDeleteAsync does not need a SaveChanges() call
 
             return amountDeleted > 0;
+        }
+
+        public async Task DeleteAllAsync(
+            CancellationToken ct = default)
+        {
+            await _db.Books.ExecuteDeleteAsync(ct);
         }
         #endregion
     }
