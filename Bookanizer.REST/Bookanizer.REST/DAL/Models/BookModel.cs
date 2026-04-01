@@ -106,30 +106,19 @@ namespace Bookanizer.REST.DAL.Models
         #endregion
 
         #region Methods
-        public void Update(
-            string? isbn, 
-            string? isbn13, 
-            string? countryCode, 
-            string? languageCode, 
-            double averageRating, 
-            int ratingsCount, 
-            int authorId, 
-            int numPages, 
-            DateOnly? publicationDate,
-            string? title, 
-            string titleWithoutSeries)
+        public void Update(BookModel book)
         {
-            Isbn = isbn;
-            Isbn13 = isbn13;
-            CountryCode = countryCode;
-            LanguageCode = languageCode;
-            AverageRating = averageRating;
-            RatingsCount = ratingsCount;
-            AuthorId = authorId;
-            NumPages = numPages;
-            PublicationDate = publicationDate;
-            Title = title;
-            TitleWithoutSeries = titleWithoutSeries;
+            Isbn = book.Isbn;
+            Isbn13 = book.Isbn13;
+            CountryCode = book.CountryCode;
+            LanguageCode = book.LanguageCode;
+            AverageRating = book.AverageRating;
+            RatingsCount = book.RatingsCount;
+            AuthorId = book.AuthorId;
+            NumPages = book.NumPages;
+            PublicationDate = book.PublicationDate;
+            Title = book.Title;
+            TitleWithoutSeries = book.TitleWithoutSeries;
         }
         #endregion
     }

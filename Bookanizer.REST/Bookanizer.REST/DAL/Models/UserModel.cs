@@ -46,12 +46,10 @@ namespace Bookanizer.REST.DAL.Models
         #endregion
 
         #region Methods
-        public void Update(
-            string username,
-            string passwordHash)
+        public void Update(UserModel user)
         {
-            Username = username;
-            PasswordHash = passwordHash;
+            Username = user.Username;
+            PasswordHash = user.PasswordHash;
         }
         #endregion
     }
