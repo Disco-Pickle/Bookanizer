@@ -16,19 +16,19 @@ namespace Bookanizer.REST.DAL.Models
             User = null!; // Tells the compiler I know it looks like null, but EF Core will populate it
             BookId = 0;
             Book = null!; // Tells the compiler I know it looks like null, but EF Core will populate it
-            IsRead = false;
-            Rating = 0.0;
+            IsRead = null;
+            Rating = null;
             DateAdded = null;
             DateUpdated = null;
             ReadAt = null;
             StartedAt = null;
-            ReadLocation = ReadLocationEnum.None;
+            ReadLocation = null;
         }
         public InteractionModel(
             string userId,
             int bookId,
-            bool isRead,
-            double rating,
+            bool? isRead,
+            double? rating,
             DateTimeOffset? dateAdded,
             DateTimeOffset? dateUpdated,
             DateTimeOffset? readAt,
@@ -62,10 +62,10 @@ namespace Bookanizer.REST.DAL.Models
         public BookModel Book { get; set; }
 
         [Column("is_read")]
-        public bool IsRead { get; set; }
+        public bool? IsRead { get; set; }
 
         [Column("rating")]
-        public double Rating { get; set; }
+        public double? Rating { get; set; }
 
         [Column("date_added")]
         public DateTimeOffset? DateAdded { get; set; }

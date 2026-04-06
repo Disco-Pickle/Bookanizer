@@ -10,12 +10,12 @@ namespace Bookanizer.REST.DAL.Models
         public AuthorModel()
         {
             AuthorId = 0;
-            Name = string.Empty;
+            Name = null;
             Books = new List<BookModel>();
         }
         public AuthorModel(
             int authorId,
-            string name)
+            string? name)
         {
             AuthorId = authorId;
             Name = name;
@@ -29,8 +29,7 @@ namespace Bookanizer.REST.DAL.Models
         public int AuthorId { get; set; }
 
         [Column("name")]
-        [Required]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public ICollection<BookModel> Books { get; set; }
         #endregion
