@@ -12,14 +12,21 @@ Lizi Liao (liaolizi.llz@gmail.com)
 S. Sacher (s.sacher102@gmail.com)
 - Replaced xrange() with range() for Python 3 compatibility
 - Replaced print statements with the print function where not already used
+- Replaced tensorflow with tensorflow.compat.v1 for TF2 to TF1 compatibility
+- Replaced tensorflow.contrib.layers.python.layers with tensorflow.keras.layers for TF2 to TF1 compatibility
+- Replaced tf.sub() with tf.subtract() for TF2 compatibility
+- Replaced tf.contrib with tf.nn and tf.losses for TF2 compatibility
+- Replaced batch_norm_layer with TF2 compatible version utilizing BatchNormalization, added self.bn_layers accordingly
+- Added pre-creation of batch norm layers to _init_graph(self)
+- Replaced keep_dims with keepdims for TF2 compatibility
+- Fixed a bug where ``activation_function = tf.tanh`` was accidentally ``activation_function == tf.tanh``
+- Removed unused imports os and sys
 
 @references:
 '''
-import os
-import sys
 import math
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf # type: ignore
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import accuracy_score
@@ -27,7 +34,9 @@ from sklearn.metrics import log_loss
 from time import time
 import argparse
 import LoadData as DATA
-from tensorflow.contrib.layers.python.layers import batch_norm as batch_norm
+from tensorflow.keras.layers import BatchNormalization # type: ignore
+
+tf.disable_v2_behavior()
 
 #################### Arguments ####################
 def parse_args():
@@ -97,8 +106,15 @@ class NeuralFM(BaseEstimator, TransformerMixin):
         '''
         Init a tensorflow Graph containing: input data, variables, model, loss, optimizer
         '''
+        self.bn_layers = {}
         self.graph = tf.Graph()
         with self.graph.as_default():  # , tf.device('/cpu:0'):
+            # Pre-create batch norm layers
+            if self.batch_norm:
+                self.bn_layers['bn_fm'] = BatchNormalization(name='bn_fm')
+                for i in range(len(self.layers)):
+                    self.bn_layers[f'bn_{i}'] = BatchNormalization(name=f'bn_{i}')
+            
             # Set graph level random seed
             tf.set_random_seed(self.random_seed)
             # Input data.
@@ -123,7 +139,7 @@ class NeuralFM(BaseEstimator, TransformerMixin):
             self.squared_sum_features_emb = tf.reduce_sum(self.squared_features_emb, 1)  # None * K
 
             # ________ FM __________
-            self.FM = 0.5 * tf.sub(self.summed_features_emb_square, self.squared_sum_features_emb)  # None * K
+            self.FM = 0.5 * tf.subtract(self.summed_features_emb_square, self.squared_sum_features_emb)  # None * K
             if self.batch_norm:
                 self.FM = self.batch_norm_layer(self.FM, train_phase=self.train_phase, scope_bn='bn_fm')
             self.FM = tf.nn.dropout(self.FM, self.dropout_keep[-1]) # dropout at the bilinear interactin layer
@@ -138,7 +154,7 @@ class NeuralFM(BaseEstimator, TransformerMixin):
             self.FM = tf.matmul(self.FM, self.weights['prediction'])     # None * 1
 
             # _________out _________
-            Bilinear = tf.reduce_sum(self.FM, 1, keep_dims=True)  # None * 1
+            Bilinear = tf.reduce_sum(self.FM, 1, keepdims=True)  # None * 1
             self.Feature_bias = tf.reduce_sum(tf.nn.embedding_lookup(self.weights['feature_bias'], self.train_features) , 1)  # None * 1
             Bias = self.weights['bias'] * tf.ones_like(self.train_labels)  # None * 1
             self.out = tf.add_n([Bilinear, self.Feature_bias, Bias])  # None * 1
@@ -146,15 +162,15 @@ class NeuralFM(BaseEstimator, TransformerMixin):
             # Compute the loss.
             if self.loss_type == 'square_loss':
                 if self.lamda_bilinear > 0:
-                    self.loss = tf.nn.l2_loss(tf.sub(self.train_labels, self.out)) + tf.contrib.layers.l2_regularizer(self.lamda_bilinear)(self.weights['feature_embeddings'])  # regulizer
+                    self.loss = tf.nn.l2_loss(tf.subtract(self.train_labels, self.out)) + tf.nn.l2_loss(self.weights['feature_embeddings']) * self.lamda_bilinear  # regulizer
                 else:
-                    self.loss = tf.nn.l2_loss(tf.sub(self.train_labels, self.out))
+                    self.loss = tf.nn.l2_loss(tf.subtract(self.train_labels, self.out))
             elif self.loss_type == 'log_loss':
                 self.out = tf.sigmoid(self.out)
                 if self.lambda_bilinear > 0:
-                    self.loss = tf.contrib.losses.log_loss(self.out, self.train_labels, weight=1.0, epsilon=1e-07, scope=None) + tf.contrib.layers.l2_regularizer(self.lamda_bilinear)(self.weights['feature_embeddings'])  # regulizer
+                    self.loss = tf.losses.log_loss(self.out, self.train_labels, weight=1.0, epsilon=1e-07, scope=None) + tf.nn.l2_loss(self.weights['feature_embeddings']) * self.lamda_bilinear  # regulizer
                 else:
-                    self.loss = tf.contrib.losses.log_loss(self.out, self.train_labels, weight=1.0, epsilon=1e-07, scope=None)
+                    self.loss = tf.losses.log_loss(self.out, self.train_labels, weight=1.0, epsilon=1e-07, scope=None)
 
             # Optimizer.
             if self.optimizer_type == 'AdamOptimizer':
@@ -215,7 +231,7 @@ class NeuralFM(BaseEstimator, TransformerMixin):
                     np.random.normal(loc=0, scale=glorot, size=(self.layers[i-1], self.layers[i])), dtype=np.float32)  # layers[i-1]*layers[i]
                 all_weights['bias_%d' %i] = tf.Variable(
                     np.random.normal(loc=0, scale=glorot, size=(1, self.layers[i])), dtype=np.float32)  # 1 * layer[i]
-	        # prediction layer
+            # prediction layer
             glorot = np.sqrt(2.0 / (self.layers[-1] + 1))
             all_weights['prediction'] = tf.Variable(np.random.normal(loc=0, scale=glorot, size=(self.layers[-1], 1)), dtype=np.float32)  # layers[-1] * 1
         else:
@@ -223,12 +239,12 @@ class NeuralFM(BaseEstimator, TransformerMixin):
         return all_weights
 
     def batch_norm_layer(self, x, train_phase, scope_bn):
-        bn_train = batch_norm(x, decay=0.9, center=True, scale=True, updates_collections=None,
-            is_training=True, reuse=None, trainable=True, scope=scope_bn)
-        bn_inference = batch_norm(x, decay=0.9, center=True, scale=True, updates_collections=None,
-            is_training=False, reuse=True, trainable=True, scope=scope_bn)
-        z = tf.cond(train_phase, lambda: bn_train, lambda: bn_inference)
-        return z
+        if scope_bn not in self.bn_layers:
+            self.bn_layers[scope_bn] = BatchNormalization(name=scope_bn)
+        bn_layer = self.bn_layers[scope_bn]
+        return tf.cond(train_phase,
+                    lambda: bn_layer(x, training=True),
+                    lambda: bn_layer(x, training=False))
 
     def partial_fit(self, data):  # fit a batch
         feed_dict = {self.train_features: data['X'], self.train_labels: data['Y'], self.dropout_keep: self.keep_prob, self.train_phase: True}
@@ -345,7 +361,7 @@ if __name__ == '__main__':
     if args.activation == 'sigmoid':
         activation_function = tf.sigmoid
     elif args.activation == 'tanh':
-        activation_function == tf.tanh
+        activation_function = tf.tanh
     elif args.activation == 'identity':
         activation_function = tf.identity
 
