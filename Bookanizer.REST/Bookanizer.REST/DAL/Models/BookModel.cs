@@ -14,14 +14,14 @@ namespace Bookanizer.REST.DAL.Models
             Isbn13 = null;
             CountryCode = null; 
             LanguageCode =  null;
-            AverageRating = 0.0;
-            RatingsCount = 0;
+            AverageRating = null;
+            RatingsCount = null;
             Author = null!; // Tells the compiler I know it looks like null, but EF Core will populate it
             AuthorId = 0;
-            NumPages = 0;
+            NumPages = null;
             PublicationDate = null;
             Title = null;
-            TitleWithoutSeries = string.Empty;
+            TitleWithoutSeries = null;
             Interactions = new List<InteractionModel>();
             BookGenres = new List<BookGenreModel>();
         }
@@ -31,13 +31,13 @@ namespace Bookanizer.REST.DAL.Models
             string? isbn13,
             string? countryCode,
             string? languageCode,
-            double averageRating,
-            int ratingsCount,
+            double? averageRating,
+            int? ratingsCount,
             int authorId,
-            int numPages,
+            int? numPages,
             DateOnly? publicationDate,
             string? title,
-            string titleWithoutSeries)
+            string? titleWithoutSeries)
         {
             BookId = bookId;
             Isbn = isbn;
@@ -79,10 +79,10 @@ namespace Bookanizer.REST.DAL.Models
         public string? LanguageCode { get; set; }
 
         [Column("average_rating")]
-        public double AverageRating { get; set; }
+        public double? AverageRating { get; set; }
 
         [Column("ratings_count")]
-        public int RatingsCount { get; set; }
+        public int? RatingsCount { get; set; }
 
         [Column("author_id")]
         public int AuthorId { get; set; }
@@ -90,7 +90,7 @@ namespace Bookanizer.REST.DAL.Models
         public AuthorModel Author { get; set; }
 
         [Column("num_pages")]
-        public int NumPages { get; set; }
+        public int? NumPages { get; set; }
 
         [Column("publication_date")]
         public DateOnly? PublicationDate { get; set; }
@@ -100,9 +100,8 @@ namespace Bookanizer.REST.DAL.Models
         public string? Title { get; set; }
 
         [Column("title_without_series")]
-        [Required]
         [MaxLength(256)]
-        public string TitleWithoutSeries { get; set; }
+        public string? TitleWithoutSeries { get; set; }
 
         public ICollection<InteractionModel> Interactions { get; set; }
         
