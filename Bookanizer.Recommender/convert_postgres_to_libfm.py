@@ -1,5 +1,8 @@
 '''
 Tool to load PostgreSQL data and convert it into LibFM data.
+
+@author:
+S. Sacher (s.sacher102@gmail.com)
 '''
 
 import argparse
