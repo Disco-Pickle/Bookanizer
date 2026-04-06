@@ -24,6 +24,8 @@ namespace Bookanizer.REST.DAL.Repositories
         {
             return await _db.Books.AsNoTracking()
                                   .Include(b => b.Author)
+                                  .Include(b => b.BookGenres)
+                                  .ThenInclude(bg => bg.Genre)
                                   .FirstOrDefaultAsync(b => b.BookId == bookId, ct);
         }
 
@@ -33,7 +35,10 @@ namespace Bookanizer.REST.DAL.Repositories
             int take,
             CancellationToken ct = default)
         {
-            IQueryable<BookModel> queryable = _db.Books.AsNoTracking().Include(b => b.Author);
+            IQueryable<BookModel> queryable = _db.Books.AsNoTracking()
+                                                       .Include(b => b.Author)
+                                                       .Include(b => b.BookGenres)
+                                                       .ThenInclude(bg => bg.Genre);
 
             if (!string.IsNullOrWhiteSpace(title))
             {
@@ -54,7 +59,9 @@ namespace Bookanizer.REST.DAL.Repositories
             CancellationToken ct = default)
         {
             IQueryable<BookModel> queryable = _db.Books.AsNoTracking()
-                                                       .Include(b => b.Author);
+                                                       .Include(b => b.Author)
+                                                       .Include(b => b.BookGenres)
+                                                       .ThenInclude(bg => bg.Genre);
 
             if (!string.IsNullOrWhiteSpace(titleWithoutSeries))
             {
