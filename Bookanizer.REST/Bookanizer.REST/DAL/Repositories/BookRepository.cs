@@ -83,6 +83,8 @@ namespace Bookanizer.REST.DAL.Repositories
             else
             {
                 dbBook.Update(book);
+                await _db.BookGenres.Where(bookGenre => bookGenre.BookId == dbBook.BookId).ExecuteDeleteAsync(ct); // Old bookGenre relations are deleted
+                await _db.BookGenres.AddRangeAsync(book.BookGenres, ct);                                           // New bookGenre relations are added
             }
 
             await _db.SaveChangesAsync(ct);
