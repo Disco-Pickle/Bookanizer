@@ -24,6 +24,8 @@ namespace Bookanizer.REST.DAL.Repositories
         {
             return await _db.Books.AsNoTracking()
                                   .Include(b => b.Author)
+                                  .Include(b => b.BookGenres)
+                                  .ThenInclude(bg => bg.Genre)
                                   .FirstOrDefaultAsync(b => b.BookId == bookId, ct);
         }
 
@@ -33,7 +35,10 @@ namespace Bookanizer.REST.DAL.Repositories
             int take,
             CancellationToken ct = default)
         {
-            IQueryable<BookModel> queryable = _db.Books.AsNoTracking().Include(b => b.Author);
+            IQueryable<BookModel> queryable = _db.Books.AsNoTracking()
+                                                       .Include(b => b.Author)
+                                                       .Include(b => b.BookGenres)
+                                                       .ThenInclude(bg => bg.Genre);
 
             if (!string.IsNullOrWhiteSpace(title))
             {
@@ -54,7 +59,9 @@ namespace Bookanizer.REST.DAL.Repositories
             CancellationToken ct = default)
         {
             IQueryable<BookModel> queryable = _db.Books.AsNoTracking()
-                                                       .Include(b => b.Author);
+                                                       .Include(b => b.Author)
+                                                       .Include(b => b.BookGenres)
+                                                       .ThenInclude(bg => bg.Genre);
 
             if (!string.IsNullOrWhiteSpace(titleWithoutSeries))
             {
@@ -83,6 +90,8 @@ namespace Bookanizer.REST.DAL.Repositories
             else
             {
                 dbBook.Update(book);
+                await _db.BookGenres.Where(bookGenre => bookGenre.BookId == dbBook.BookId).ExecuteDeleteAsync(ct); // Old bookGenre relations are deleted
+                await _db.BookGenres.AddRangeAsync(book.BookGenres, ct);                                           // New bookGenre relations are added
             }
 
             await _db.SaveChangesAsync(ct);

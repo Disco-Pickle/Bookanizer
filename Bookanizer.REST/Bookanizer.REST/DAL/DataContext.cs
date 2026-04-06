@@ -11,7 +11,9 @@ namespace Bookanizer.REST.DAL
 
         #region DbSets (Tables)
         public DbSet<AuthorModel> Authors { get; set; }
+        public DbSet<BookGenreModel> BookGenres { get; set; }
         public DbSet<BookModel> Books { get; set; }
+        public DbSet<GenreModel> Genres { get; set; }
         public DbSet<InteractionModel> Interactions { get; set; }
         public DbSet<UserModel> Users { get; set; }
         #endregion
@@ -34,6 +36,16 @@ namespace Bookanizer.REST.DAL
                 .WithMany(book => book.Interactions)                // Books have many interactions
                 .HasForeignKey(interaction => interaction.BookId)   // FK: BookId
                 .OnDelete(DeleteBehavior.Cascade);                  // On deletion of a book, delete dependent interactions
+            modelBuilder.Entity<BookGenreModel>()
+                .HasOne<BookModel>(bookGenre => bookGenre.Book) // BookGenre relations have one book
+                .WithMany(book => book.BookGenres)              // Books have many bookGenre relations
+                .HasForeignKey(bookGenre => bookGenre.BookId)   // FK: BookId
+                .OnDelete(DeleteBehavior.Cascade);              // On deletion of a book, delete dependent bookGenre relations
+            modelBuilder.Entity<BookGenreModel>()
+                .HasOne<GenreModel>(bookGenre => bookGenre.Genre) // BookGenre relations have one genre
+                .WithMany(genre => genre.BookGenres)              // Genres have many bookGenre relations
+                .HasForeignKey(bookGenre => bookGenre.GenreId)    // FK: GenreId
+                .OnDelete(DeleteBehavior.Cascade);                // On deletion of a genre, delete dependent bookGenre relations
             base.OnModelCreating(modelBuilder);
         }
         #endregion

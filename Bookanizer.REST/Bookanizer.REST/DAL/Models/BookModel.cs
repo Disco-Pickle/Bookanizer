@@ -23,6 +23,7 @@ namespace Bookanizer.REST.DAL.Models
             Title = null;
             TitleWithoutSeries = null;
             Interactions = new List<InteractionModel>();
+            BookGenres = new List<BookGenreModel>();
         }
         public BookModel(
             int bookId,
@@ -52,6 +53,7 @@ namespace Bookanizer.REST.DAL.Models
             Title = title;
             TitleWithoutSeries = titleWithoutSeries;
             Interactions = new List<InteractionModel>();
+            BookGenres = new List<BookGenreModel>();
         }
         #endregion
 
@@ -102,6 +104,8 @@ namespace Bookanizer.REST.DAL.Models
         public string? TitleWithoutSeries { get; set; }
 
         public ICollection<InteractionModel> Interactions { get; set; }
+        
+        public ICollection<BookGenreModel> BookGenres { get; set; }
         #endregion
 
         #region Methods
