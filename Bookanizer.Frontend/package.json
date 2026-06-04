@@ -1,0 +1,29 @@
+{
+  "name": "bookanizer-frontend",
+  "version": "0.1.0",
+  "description": "Quasar frontend for Bookanizer book recommendation system",
+  "productName": "Bookanizer",
+  "author": "Caz",
+  "private": true,
+  "scripts": {
+    "dev": "quasar dev",
+    "build": "quasar build",
+    "lint": "echo \"No linting configured\""
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.16.0",
+    "axios": "^1.7.0",
+    "pinia": "^2.1.0",
+    "quasar": "^2.16.0",
+    "vue": "^3.4.0",
+    "vue-router": "^4.3.0"
+  },
+  "devDependencies": {
+    "@quasar/app-vite": "^2.0.0",
+    "autoprefixer": "^10.4.0"
+  },
+  "engines": {
+    "node": "^20 || ^22 || ^24",
+    "npm": ">= 6.13.4"
+  }
+}
