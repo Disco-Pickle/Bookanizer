@@ -142,8 +142,8 @@ async function onFilter (val, update, abort) {
 async function onSubmit () {
   loading.value = true
   try {
-    // Assumes POST /collection adds an interaction for the current user.
-    await api.post('/collection', {
+    // Assumes PUT /collection updates an existing interaction for the current user.
+    await api.put('/collection', {
       bookId: selectedBook.value,
       rating: form.value.rating || null,
       readLocation: form.value.readLocation,

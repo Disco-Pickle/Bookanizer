@@ -17,19 +17,6 @@
         autocomplete="username"
       />
       <q-input
-        v-model="form.email"
-        label="Email"
-        type="email"
-        outlined
-        dense
-        class="bk-field"
-        :rules="[
-          (v) => !!v || 'Email is required',
-          (v) => /.+@.+\..+/.test(v) || 'Enter a valid email'
-        ]"
-        autocomplete="email"
-      />
-      <q-input
         v-model="form.password"
         label="Password"
         type="password"
@@ -81,7 +68,7 @@ const router = useRouter()
 const $q = useQuasar()
 const auth = useAuthStore()
 
-const form = ref({ username: '', email: '', password: '', confirm: '' })
+const form = ref({ username: '', password: '', confirm: '' })
 const loading = ref(false)
 
 async function onSubmit () {
@@ -89,7 +76,6 @@ async function onSubmit () {
   try {
     await auth.register({
       username: form.value.username,
-      email: form.value.email,
       password: form.value.password
     })
     // If the server returned a token, the user is logged in already.

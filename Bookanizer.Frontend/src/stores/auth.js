@@ -23,11 +23,11 @@ export const useAuthStore = defineStore('auth', {
       else localStorage.removeItem('bk_user')
     },
 
-    async register ({ username, email, password }) {
-      const { data } = await api.post('/auth/register', { username, email, password })
+    async register ({ username, password }) {
+      const { data } = await api.post('/auth/register', { username, password })
       // Server may return a token on register, or just the user. Handle both.
       if (data.token) this.token = data.token
-      this.user = data.user || { username, email }
+      this.user = data.user || { username }
       this._persist()
       return data
     },
