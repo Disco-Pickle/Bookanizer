@@ -1,7 +1,10 @@
 using Bookanizer.REST.DAL;
 using log4net;
 using log4net.Config;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 // -----------------------
 // LOG
@@ -33,6 +36,25 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseNpgsql(Configuration.PostgresConnectionString);
 });
 logger.Info("DbContext added to builder.");
+
+// Authentication & Authorization using JWT
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
+builder.Services.AddAuthorization();
+logger.Info("JWT Authentication and Authorization added.");
 
 // Health Check
 builder.Services.AddHealthChecks();
