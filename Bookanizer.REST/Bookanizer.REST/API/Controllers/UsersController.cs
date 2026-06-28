@@ -22,7 +22,7 @@ namespace Bookanizer.REST.API.Controllers
         #endregion
 
         #region Endpoints
-        [HttpGet]
+        [HttpGet("me")]
         [ProducesResponseType(typeof(UserReadDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
