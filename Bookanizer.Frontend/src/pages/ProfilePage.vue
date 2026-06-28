@@ -37,7 +37,7 @@
       <div v-else class="bk-grid">
         <BookCard
           v-for="item in collection"
-          :key="item.id || item.bookId"
+          :key="bookOf(item).bookId"
           :book="bookOf(item)"
         >
           <template #action>
@@ -101,7 +101,7 @@ function onRemove (item) {
     persistent: true
   }).onOk(async () => {
     try {
-      await api.delete(`/collection/${item.id || item.bookId}`)
+      await api.delete(`/collection/${bookOf(item).bookId}`)
       collection.value = collection.value.filter((c) => c !== item)
       $q.notify({ type: 'positive', message: 'Removed.' })
     } catch (err) {
