@@ -7,85 +7,114 @@
         the model factors reading location into its prediction.
       </p>
 
-      <q-card flat class="bk-card q-pa-lg q-mb-lg">
-        <div class="row q-col-gutter-md items-end">
-          <div class="col-12 col-sm">
-            <div class="text-caption q-mb-xs" style="color: var(--ink-soft)">
-              Reading context (optional)
+      <!-- Gate state: user has fewer than the required number of books -->
+      <div v-if="gated" class="bk-card q-pa-xl text-center" style="color: var(--ink-soft)">
+        <q-icon name="menu_book" size="42px" class="q-mb-sm" style="color: var(--gold)" />
+        <div class="font-display text-h6" style="color: var(--ink)">
+          Add {{ REQUIRED_BOOKS }} books to unlock recommendations
+        </div>
+        <div class="q-mb-md">
+          The recommender needs at least {{ REQUIRED_BOOKS }} read books to learn your taste.
+          <template v-if="booksRead != null">
+            You have {{ booksRead }} so far — {{ booksRemaining }} to go.
+          </template>
+        </div>
+        <q-linear-progress
+          v-if="booksRead != null"
+          :value="booksRead / REQUIRED_BOOKS"
+          rounded
+          size="10px"
+          color="primary"
+          track-color="rgba(0,0,0,0.08)"
+          class="q-mb-md"
+          style="max-width: 320px; margin-inline: auto;"
+        />
+        <q-btn no-caps unelevated color="primary" icon="add" label="Add a book"
+               @click="$router.push({ name: 'add-book' })" />
+      </div>
+
+      <!-- Normal flow: user is eligible -->
+      <template v-else>
+        <q-card flat class="bk-card q-pa-lg q-mb-lg">
+          <div class="row q-col-gutter-md items-end">
+            <div class="col-12 col-sm">
+              <div class="text-caption q-mb-xs" style="color: var(--ink-soft)">
+                Reading context (optional)
+              </div>
+              <q-select
+                v-model="readLocation"
+                outlined
+                dense
+                class="bk-field"
+                label="Where will you read?"
+                :options="readLocations"
+                emit-value
+                map-options
+                clearable
+              />
             </div>
-            <q-select
-              v-model="readLocation"
-              outlined
-              dense
-              class="bk-field"
-              label="Where will you read?"
-              :options="readLocations"
-              emit-value
-              map-options
-              clearable
-            />
+            <div class="col-12 col-sm-auto">
+              <q-btn
+                no-caps
+                unelevated
+                color="primary"
+                icon="auto_awesome"
+                label="Recommend a book"
+                :loading="loading"
+                @click="getRecommendation"
+              />
+            </div>
           </div>
-          <div class="col-12 col-sm-auto">
-            <q-btn
-              no-caps
-              unelevated
-              color="primary"
-              icon="auto_awesome"
-              label="Recommend a book"
-              :loading="loading"
-              @click="getRecommendation"
-            />
-          </div>
+        </q-card>
+
+        <div v-if="loading" class="row justify-center q-py-xl">
+          <q-spinner-dots size="44px" color="primary" />
         </div>
-      </q-card>
 
-      <div v-if="loading" class="row justify-center q-py-xl">
-        <q-spinner-dots size="44px" color="primary" />
-      </div>
+        <transition appear enter-active-class="animated fadeInUp">
+          <div v-if="!loading && recommendation" class="bk-rec">
+            <div class="text-caption q-mb-sm" style="color: var(--oxblood); letter-spacing: 0.08em; text-transform: uppercase;">
+              Recommended for you
+            </div>
+            <div class="font-display text-h4" style="font-weight: 600; line-height: 1.1;">
+              {{ recommendation.title }}
+            </div>
+            <div class="text-subtitle1 q-mt-xs" style="color: var(--ink-soft)">
+              {{ authorLabel }}
+            </div>
 
-      <transition appear enter-active-class="animated fadeInUp">
-        <div v-if="!loading && recommendation" class="bk-rec">
-          <div class="text-caption q-mb-sm" style="color: var(--oxblood); letter-spacing: 0.08em; text-transform: uppercase;">
-            Recommended for you
-          </div>
-          <div class="font-display text-h4" style="font-weight: 600; line-height: 1.1;">
-            {{ recommendation.title }}
-          </div>
-          <div class="text-subtitle1 q-mt-xs" style="color: var(--ink-soft)">
-            {{ authorLabel }}
-          </div>
+            <div v-if="recommendation.averageRating" class="row items-center q-gutter-xs q-mt-sm">
+              <q-icon name="star" size="16px" style="color: var(--gold)" />
+              <span>{{ Number(recommendation.averageRating).toFixed(2) }}</span>
+              <span v-if="recommendation.ratingsCount" style="color: var(--ink-soft)">
+                · {{ recommendation.ratingsCount.toLocaleString() }} ratings
+              </span>
+            </div>
 
-          <div v-if="recommendation.averageRating" class="row items-center q-gutter-xs q-mt-sm">
-            <q-icon name="star" size="16px" style="color: var(--gold)" />
-            <span>{{ Number(recommendation.averageRating).toFixed(2) }}</span>
-            <span v-if="recommendation.ratingsCount" style="color: var(--ink-soft)">
-              · {{ recommendation.ratingsCount.toLocaleString() }} ratings
-            </span>
-          </div>
+            <div v-if="recommendation.score != null" class="q-mt-sm text-caption" style="color: var(--ink-soft)">
+              Predicted preference score: {{ Number(recommendation.score).toFixed(3) }}
+              <span v-if="usedLocation"> · context: {{ usedLocation }}</span>
+            </div>
 
-          <div v-if="recommendation.score != null" class="q-mt-sm text-caption" style="color: var(--ink-soft)">
-            Predicted preference score: {{ Number(recommendation.score).toFixed(3) }}
-            <span v-if="usedLocation"> · context: {{ usedLocation }}</span>
-          </div>
+            <p v-if="recommendation.description" class="q-mt-md" style="color: var(--ink-soft)">
+              {{ recommendation.description }}
+            </p>
 
-          <p v-if="recommendation.description" class="q-mt-md" style="color: var(--ink-soft)">
-            {{ recommendation.description }}
-          </p>
-
-          <div class="row q-gutter-sm q-mt-md">
-            <q-btn no-caps unelevated color="primary" icon="add" label="Add to collection"
-                   @click="addRecommended" />
-            <q-btn no-caps flat color="primary" icon="refresh" label="Try another"
-                   @click="getRecommendation" />
+            <div class="row q-gutter-sm q-mt-md">
+              <q-btn no-caps unelevated color="primary" icon="add" label="Add to collection"
+                     @click="addRecommended" />
+              <q-btn no-caps flat color="primary" icon="refresh" label="Try another"
+                     @click="getRecommendation" />
+            </div>
           </div>
+        </transition>
+
+        <div v-if="!loading && !recommendation" class="bk-card q-pa-xl text-center" style="color: var(--ink-soft)">
+          <q-icon name="auto_awesome" size="42px" class="q-mb-sm" style="color: var(--gold)" />
+          <div class="font-display text-h6" style="color: var(--ink)">No recommendation yet</div>
+          <div>Press the button above to get a suggestion from the recommender.</div>
         </div>
-      </transition>
-
-      <div v-if="!loading && !recommendation" class="bk-card q-pa-xl text-center" style="color: var(--ink-soft)">
-        <q-icon name="auto_awesome" size="42px" class="q-mb-sm" style="color: var(--gold)" />
-        <div class="font-display text-h6" style="color: var(--ink)">No recommendation yet</div>
-        <div>Press the button above to get a suggestion from the recommender.</div>
-      </div>
+      </template>
     </div>
   </q-page>
 </template>
@@ -99,10 +128,20 @@ import { api } from 'boot/axios'
 const router = useRouter()
 const $q = useQuasar()
 
+const REQUIRED_BOOKS = 10
+
 const readLocation = ref(null)
 const usedLocation = ref(null)
 const recommendation = ref(null)
 const loading = ref(false)
+
+// Gate state, driven by the API's 422 response.
+const gated = ref(false)
+const booksRead = ref(null)
+
+const booksRemaining = computed(() =>
+  booksRead.value == null ? REQUIRED_BOOKS : Math.max(0, REQUIRED_BOOKS - booksRead.value)
+)
 
 const readLocations = [
   { label: 'Home', value: 'Home' },
@@ -122,22 +161,27 @@ const authorLabel = computed(() => {
 async function getRecommendation () {
   loading.value = true
   try {
-    // Assumes GET /recommendations returns one or more books; the read
-    // location is forwarded so the NFM can use it as a contextual feature.
     const { data } = await api.get('/recommendations', {
       params: readLocation.value ? { readLocation: readLocation.value } : {}
     })
     const rec = Array.isArray(data) ? data[0] : (data.recommendation || data)
     recommendation.value = rec || null
     usedLocation.value = readLocation.value
-    if (!rec) {
-      $q.notify({ type: 'warning', message: 'No recommendation available yet — add more books first.' })
-    }
+    // A successful call means the user is eligible — clear any prior gate.
+    gated.value = false
   } catch (err) {
-    $q.notify({
-      type: 'negative',
-      message: err.response?.data?.message || 'Could not fetch a recommendation.'
-    })
+    if (err.response?.status === 422) {
+      // Not enough reading history. Surface the gate, not a transient error.
+      gated.value = true
+      const ext = err.response.data || {}
+      booksRead.value = ext.booksRead ?? ext.extensions?.booksRead ?? null
+      recommendation.value = null
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: err.response?.data?.detail || err.response?.data?.title || 'Could not fetch a recommendation.'
+      })
+    }
   } finally {
     loading.value = false
   }

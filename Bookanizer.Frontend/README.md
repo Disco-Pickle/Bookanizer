@@ -26,12 +26,12 @@ controllers or the calls in the pages/store so they line up.
 
 | Method & path             | Used by        | Notes                                            |
 |---------------------------|----------------|--------------------------------------------------|
-| `POST /auth/register`     | Register       | `{ username, email, password }` → `{ token?, user }` |
+| `POST /auth/register`     | Register       | `{ username, password }` → `{ token?, user }` |
 | `POST /auth/login`        | Login          | `{ username, password }` → `{ token, user }`     |
 | `GET  /users/me`          | Profile        | Current user                                     |
 | `GET  /books/search?q=`   | Search, Add    | Array of books (or `{ items }`/`{ results }`)    |
 | `GET  /collection`        | Profile        | The user's collection items                      |
-| `POST /collection`        | Add book       | `{ bookId, rating, readLocation, dateRead, review }` |
+| `PUT /collection`         | Add book       | `{ bookId, rating, readLocation, dateRead, review }` |
 | `DELETE /collection/:id`  | Profile        | Remove an item                                   |
 | `GET  /recommendations`   | Recommend      | Optional `?readLocation=`; returns a book/score  |
 
