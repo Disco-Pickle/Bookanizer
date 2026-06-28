@@ -50,6 +50,20 @@ namespace Bookanizer.REST.API.Controllers
             await _interactionSvc.UpsertAsync(userId, interaction, ct);
             return NoContent();
         }
+
+        [HttpDelete("{bookId:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> Delete(int bookId, CancellationToken ct = default)
+        {
+            // Authorize via JWT
+            string? userId = GetUserIdOrNull();
+            if (userId is null) { return Unauthorized(); } // Fallback, should not be reached if Authorization worked properly
+
+            // Deleting interaction
+            await _interactionSvc.DeleteAsync(userId, bookId, ct);
+            return NoContent();
+        }
         #endregion
 
         #region Helpers
