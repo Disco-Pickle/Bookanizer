@@ -28,9 +28,12 @@ namespace Bookanizer.REST.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Get(CancellationToken ct = default)
         {
+            // Authorization via JWT
             string? userId = GetUserIdOrNull();
             if (userId is null) { return Unauthorized(); } // Fallback, should not be reached if Authorization worked properly
-            var user = await _userSvc.GetAsync(userId, ct);
+            
+            // Getting user data
+            var user = await _userSvc.ReadAsync(userId, ct);
             return user is null ? NotFound() : Ok(user);
         }
         #endregion
