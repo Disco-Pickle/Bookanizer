@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Bookanizer.REST.API.DTOs;
+using Bookanizer.REST.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bookanizer.REST.API.Controllers
@@ -23,7 +25,7 @@ namespace Bookanizer.REST.API.Controllers
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest req, CancellationToken ct = default)
+        public async Task<IActionResult> Register([FromBody] RegisterRequestDto req, CancellationToken ct = default)
         {
             try
             {
@@ -40,7 +42,7 @@ namespace Bookanizer.REST.API.Controllers
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> Login([FromBody] LoginRequest req, CancellationToken ct = default)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto req, CancellationToken ct = default)
         {
             try
             {
