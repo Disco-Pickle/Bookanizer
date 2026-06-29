@@ -1,4 +1,5 @@
 using Bookanizer.REST.DAL;
+using Bookanizer.REST.Middleware;
 using log4net;
 using log4net.Config;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -38,6 +39,13 @@ builder.Services.AddDbContext<DataContext>(options =>
 logger.Info("DbContext added to builder.");
 
 // Authentication & Authorization using JWT
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]
+    ?? throw new InvalidOperationException("Jwt:Issuer is not configured.");
+var jwtAudience = builder.Configuration["Jwt:Audience"]
+    ?? throw new InvalidOperationException("Jwt:Audience is not configured.");
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Jwt:Key is not configured.");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -47,10 +55,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+                Encoding.UTF8.GetBytes(jwtKey))
         };
     });
 builder.Services.AddAuthorization();
@@ -87,10 +95,30 @@ using (var scope = app.Services.CreateScope())
 }
 
 // -----------------------
+// EXCEPTION HANDLING
+// -----------------------
+
+logger.Info("=== Enabling exception handling middleware ===");
+app.UseExceptionHandling();
+
+logger.Info("=== Enabling status code pages ===");
+app.UseStatusCodePages(async statusCodeContext =>
+{
+    var context = statusCodeContext.HttpContext;
+    var statusCode = context.Response.StatusCode;
+
+    // Only synthesize a body for error statuses that arrived without one.
+    if (statusCode >= 400)
+    {
+        await ProblemWriter.WriteAsync(context, statusCode, ProblemWriter.ReasonFor(statusCode));
+    }
+});
+
+// -----------------------
 // HTTP REQUEST PIPELINE
 // -----------------------
 
-logger.Info("=== Configuring HTTPS Request Pipeline ===");
+logger.Info("=== Configuring HTTP Request Pipeline ===");
 
 // OpenApi
 if (app.Environment.IsDevelopment())
