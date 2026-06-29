@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Bookanizer.REST.API.DTOs;
+using Bookanizer.REST.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
