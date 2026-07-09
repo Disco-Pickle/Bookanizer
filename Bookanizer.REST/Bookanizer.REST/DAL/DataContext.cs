@@ -46,6 +46,9 @@ namespace Bookanizer.REST.DAL
                 .WithMany(genre => genre.BookGenres)              // Genres have many bookGenre relations
                 .HasForeignKey(bookGenre => bookGenre.GenreId)    // FK: GenreId
                 .OnDelete(DeleteBehavior.Cascade);                // On deletion of a genre, delete dependent bookGenre relations
+            modelBuilder.Entity<UserModel>()
+                .HasIndex(user => user.Username) // Usernames are indexed
+                .IsUnique();                     // And must be unique
             base.OnModelCreating(modelBuilder);
         }
         #endregion

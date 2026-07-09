@@ -7,6 +7,7 @@ namespace Bookanizer.REST.DAL.Repositories.Interfaces
         #region User Level CRUD Operations
         Task CreateSingleAsync(UserModel user, CancellationToken ct = default);
         Task<UserModel?> ReadSingleByIdAsync(string userId, CancellationToken ct = default);
+        Task<UserModel?> ReadSingleByNameAsync(string username, CancellationToken ct = default);
         Task UpdateSingleAsync(UserModel user, CancellationToken ct = default);
         Task<bool> DeleteSingleByIdAsync(string id, CancellationToken ct = default);
         #endregion

@@ -33,6 +33,7 @@ services:
       - POSTGRES_DATABASE=bookanizer
       - POSTGRES_USERNAME=bookanizer
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - Jwt__Secret=${JWT_SECRET} # "Jwt__Secret" resolves to "Jwt:Secret"
     depends_on:
       postgres:
         condition: service_healthy

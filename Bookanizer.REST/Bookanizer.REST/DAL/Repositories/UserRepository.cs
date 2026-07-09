@@ -42,6 +42,14 @@ namespace Bookanizer.REST.DAL.Repositories
                                   .FirstOrDefaultAsync(u => u.UserId == userId, ct);
         }
 
+        public async Task<UserModel?> ReadSingleByNameAsync(
+            string username,
+            CancellationToken ct = default)
+        {
+            return await _db.Users.AsNoTracking()
+                                  .FirstOrDefaultAsync(u => u.Username == username, ct);
+        }
+
         public async Task UpdateSingleAsync(
             UserModel user,
             CancellationToken ct = default)
