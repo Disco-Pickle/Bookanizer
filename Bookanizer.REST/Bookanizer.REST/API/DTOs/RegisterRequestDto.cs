@@ -1,5 +1,7 @@
-﻿namespace Bookanizer.REST.API.DTOs;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Bookanizer.REST.API.DTOs;
 
 public sealed record RegisterRequestDto(
-    string Username,
-    string Password);
+    [property: Required, StringLength(64, MinimumLength = 6)] string Username,
+    [property: Required, StringLength(64, MinimumLength = 8)] string Password);
